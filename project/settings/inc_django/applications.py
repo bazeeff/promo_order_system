@@ -1,0 +1,14 @@
+INSTALLED_APPS = [
+    "django.contrib.auth",
+    "django.contrib.admin",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.staticfiles",
+    "django.contrib.messages",
+    "corsheaders",
+    "django_filters",
+    "drf_yasg",
+    "rest_framework",
+    "drf_extra_fields",
+    "apps.user",
+]

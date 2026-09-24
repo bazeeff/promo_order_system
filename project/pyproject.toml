@@ -1,0 +1,48 @@
+[tool.poetry]
+name = "promo_order_system"
+version = "0.1.0"
+description = "Тестовое задание"
+authors = ["Artem Bazeev <ivan0v.42@yandex.ru>"]
+license = "proprietary"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+django = "^5.1.2"
+celery = "^5.3.6"
+django-constance = {extras = ["database"], version = "^3.1.0"}
+django-cors-headers = "^4.3.1"
+django-environ = "^0.11.2"
+django-filter = "^23.4"
+django-lifecycle = "^1.1.2"
+djangorestframework = "^3.14.0"
+djangorestframework-simplejwt = "^5.3.0"
+drf-yasg = "^1.21.7"
+gunicorn = "^21.2.0"
+jsonpointer = "^2.4"
+uvicorn = "^0.23.2"
+django-celery-results = "^2.5.1"
+django-celery-beat = "^2.5.0"
+psycopg2-binary  = "^2.8.4"
+django-phonenumber-field = "^4.0.0"
+phonenumbers = "^8.11.2"
+django-extra-fields = "^2.0.3"
+httpx = "^0.27.2"
+django-querycount = "^0.8.3"
+redis = "^5.2.0"
+pytest = "^7.0"
+pytest-django = "^4.0"
+mixer = "^7.2.2"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.11.0"
+isort = "^5.12.0"
+requests-mock = "^1.9.3"
+aioresponses = "^0.7.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+test = "pytest api/v1"
