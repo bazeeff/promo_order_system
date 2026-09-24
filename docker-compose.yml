@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: ./project
+      dockerfile: Dockerfile
+      args:
+        options: --reload
+    command: gunicorn --bind 0.0.0.0:8000 --timeout 600 --log-level debug --reload --workers 4  apps.wsgi:application
+    volumes:
+      - ./project:/home/app
+      - ./volumes/static:/static
+      - ./volumes/media:/media
+    expose:
+      - 8000
+    env_file:
+      - ./.env
+    depends_on:
+      - db
+    restart: always
+
+  db:
+    image: postgres:16.0-alpine
+    volumes:
+      - ./volumes/db/data:/var/lib/postgresql/data/
+    env_file:
+      - ./.env.db
+    restart: unless-stopped
+
+  redis:
+    image: redis:5-alpine
+    container_name: redis
+    restart: always
+    volumes:
+      - ./volumes/redis/data:/data
+    expose:
+      - 6379
+    ports:
+      - 6379:6379
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - web
+    restart: always
+
+  celery:
+    build: ./project
+    volumes:
+      - ./project:/home/app
+      - ./volumes/static:/static
+      - ./volumes/media:/media
+    container_name: celery
+    depends_on:
+      - db
+      - redis
+    command: celery -A apps worker -l info -B -c 4
+    links:
+      - redis
+    env_file:
+      - ./.env
+    restart: always

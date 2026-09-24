@@ -11,4 +11,5 @@ INSTALLED_APPS = [
     "rest_framework",
     "drf_extra_fields",
     "apps.user",
+    "apps.order",
 ]
