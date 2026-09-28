@@ -12,4 +12,5 @@ INSTALLED_APPS = [
     "drf_extra_fields",
     "apps.user",
     "apps.order",
+    "apps.mailing",
 ]

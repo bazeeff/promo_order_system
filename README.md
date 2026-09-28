@@ -12,7 +12,7 @@ docker compose up --build     # API за nginx: http://localhost/api/v1/
 Локально: `poetry install`, `python manage.py runserver` (нужен Postgres
 из `.env`, либо docker compose db).
 
-Тесты: `pytest api/v1` (в docker: `docker compose run web pytest api/v1`).
+Тесты: `pytest api/v1 apps/mailing` (в docker: `docker compose run web pytest`).
 
 ## Эндпоинты
 
@@ -88,6 +88,39 @@ Idempotency-Key: 7d1c4b0e-...
 позициям, округление до копеек half-up; цены фиксируются снимком в
 `OrderItem.unit_price`. Если подходящих позиций нет — заказ не создаётся.
 
+## Импорт рассылок из XLSX
+
+Импорт запускается management-командой; каждая строка файла — письмо,
+которое ставится в отправку Celery-воркером. По условию задачи отправка
+имитируется: письмо записывается в лог с задержкой
+`MAILING_SEND_DELAY_SECONDS` (по умолчанию 5 c) вместо SMTP.
+
+```bash
+python manage.py import_mailings path/to/mailings.xlsx [--batch-size 500] [--dry-run]
+```
+
+Первая строка файла — заголовки колонок (порядок не важен):
+`external_id`, `user_id`, `email`, `subject`, `message`.
+`external_id` уникален и защищает от повторной обработки при повторном
+импорте. Файл читается потоково и пишется батчами — размер не ограничен
+памятью.
+
+Пример вывода:
+
+```
+Строка 3 ошибочна: user_id не является UUID: 'bad-uuid'
+Импорт завершён: обработано строк 4, создано записей 2, пропущено записей 1, ошибочных строк 1.
+```
+
+Строка считается ошибочной, если: пуст `external_id`/`subject`/`message`,
+`user_id` не UUID или пользователь не найден, email некорректный. Дубли
+(в файле или уже в БД) пропускаются. `--dry-run` проверяет файл, ничего
+не создавая.
+
+Статусы письма: `pending` → `sent` (ставит задача
+`apps.mailing.tasks.send_mailing`, идемпотентна). Если брокер недоступен,
+импорт завершается штатно, письма остаются в `pending`.
+
 ## Архитектура
 
 ```
@@ -95,6 +128,11 @@ project/
 ├── apps/order/
 │   ├── models/       # Category, Good, PromoCode, Order, OrderItem, PromoRedemption
 │   └── services.py   # OrderCreationService: транзакция, блокировка промокода, расчёт
+├── apps/mailing/
+│   ├── models/       # Mailing: письмо рассылки с external_id и статусом
+│   ├── services.py   # MailingsImportService: потоковое чтение XLSX, батчи, валидация
+│   ├── tasks.py      # send_mailing: отправка письмом в лог с задержкой
+│   └── management/commands/import_mailings.py
 └── api/v1/order/
     ├── serializers.py  # вход/выход для всех сущностей заказа
     ├── views.py        # OrderCreateView + ViewSet'ы справочников и заказов

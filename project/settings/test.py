@@ -16,6 +16,9 @@ else:
 # django-constance c бд на in memory (https://django-constance.readthedocs.io/en/latest/testing.html#memory-backend)
 CONSTANCE_BACKEND = "constance.backends.memory.MemoryBackend"
 
+# Отправка писем в тестах — без задержки.
+MAILING_SEND_DELAY_SECONDS = 0
+
 
 DATABASES = {
     "default": {

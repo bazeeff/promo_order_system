@@ -39,4 +39,5 @@ from .inc_other.cors import *  # noqa
 from .inc_other.drf import *  # noqa
 from .inc_other.fcm_django import *  # noqa
 from .inc_other.jwt import *  # noqa
+from .inc_other.mailing import *  # noqa
 from .inc_other.swagger import *  # noqa
