@@ -5,6 +5,7 @@ from rest_framework import exceptions, serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.serializers import as_serializer_error
 from rest_framework.views import exception_handler as base_exception_handler
+from rest_framework.exceptions import APIException
 
 
 class BadRequestResponseSerializer(serializers.Serializer):
@@ -41,3 +42,44 @@ def exception_handler(exc, context):
             data["errors"] = exc.detail
         response.data = data
     return response
+
+class IdempotencyConflict(APIException):
+    status_code = 409
+    default_detail = "Idempotency-Key was already used with a different request body."
+    default_code = "idempotency_conflict"
+
+
+class PromoAlreadyUsed(APIException):
+    status_code = 409
+    default_detail = "This user has already used this promo code."
+    default_code = "promo_already_used"
+
+
+class PromoUsageLimitReached(APIException):
+    status_code = 409
+    default_detail = "Promo code usage limit has been reached."
+    default_code = "promo_usage_limit_reached"
+
+
+class PromoNotFound(APIException):
+    status_code = 404
+    default_detail = "Promo code does not exist."
+    default_code = "promo_not_found"
+
+
+class PromoInactive(APIException):
+    status_code = 400
+    default_detail = "Promo code is deactivated."
+    default_code = "promo_inactive"
+
+
+class PromoExpired(APIException):
+    status_code = 400
+    default_detail = "Promo code has expired."
+    default_code = "promo_expired"
+
+
+class PromoNotApplicable(APIException):
+    status_code = 400
+    default_detail = "Promo code does not apply to any item in the order."
+    default_code = "promo_not_applicable"

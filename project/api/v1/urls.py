@@ -4,11 +4,22 @@ from drf_yasg.views import get_schema_view
 from rest_framework import permissions, routers
 
 from .celery.views import CeleryResultView
+from .order.views import (
+    CategoryViewSet,
+    GoodViewSet,
+    OrderCreateView,
+    OrderViewSet,
+    PromoCodeViewSet,
+)
 from .user.views import UserViewSet
 
 router = routers.DefaultRouter()
 
 router.register("user", UserViewSet, basename="user")
+router.register("categories", CategoryViewSet, basename="category")
+router.register("goods", GoodViewSet, basename="good")
+router.register("promo-codes", PromoCodeViewSet, basename="promo-code")
+router.register("orders", OrderViewSet, basename="order")
 
 
 schema_view = get_schema_view(
@@ -31,4 +42,5 @@ urlpatterns = [
     path("redoc/", schema_view.with_ui("redoc"), name="schema-redoc"),
     path("", include((router.urls, "api-root")), name="api-root"),
     path("celery/result/<pk>/", CeleryResultView.as_view()),
+    path("order/", OrderCreateView.as_view(), name="order-create"),
 ]
